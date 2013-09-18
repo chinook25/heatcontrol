@@ -1,5 +1,7 @@
 package heatcontrol
 
-class Main {
-	//test
+object HelloWorld {
+  def main(args: Array[String]) {
+    println("Hello, world!")
+  }
 }
