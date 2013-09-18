@@ -1,0 +1,5 @@
+package heatcontrol
+
+class Main {
+
+}
