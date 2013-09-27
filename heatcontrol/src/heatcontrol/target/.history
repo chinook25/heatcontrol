@@ -10,3 +10,7 @@ console
 run Main.scala
 compile
 run Main.scala
+import com.mongodb.casbah._
+compile
+main
+import com.mongodb.casbah._
