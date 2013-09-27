@@ -21,9 +21,10 @@
       <script src="../Bootstrap/js/respond.min.js"></script> 
     <![endif]-->    
     
-  <script src="../Highchart/js/highcharts.js"></script>
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>  
-  <script type="text/javascript" src="../Scripts/graph.js"></script>
+  <script type="text/javascript" src="../Scripts/mainpage.js"></script>
+  <script src="../Highchart/js/highcharts.js"></script>
+  
   
   </head>
 
@@ -60,12 +61,13 @@
             <p>This page is used to monitor the room temperatures of rooms in a virtual building. 
             The interface can be used to add more rooms. </p>
           </div>
-          <div class="row">
+          <div class="row" id="roomTable">
             <div class="col-6 col-sm-6 col-lg-4">
               <h2>Heading</h2>
               <p>
-				<script>graph()</script>
-              <p><a class="btn btn-default" href="#">View details &raquo;</a></p>
+              	<div id='graph1'></div>
+				<script>graph('#graph1')</script>
+              <p><a class="btn btn-default" href="roomInformation.html?id=room1">View details &raquo;</a></p>
             </div><!--/span-->
             <div class="col-6 col-sm-6 col-lg-4">
               <h2>Heading</h2>

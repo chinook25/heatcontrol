@@ -20,6 +20,11 @@
       <script src="../Bootstrap/js/html5shiv.js"></script>
       <script src="../Bootstrap/js/respond.min.js"></script>
     <![endif]-->
+    
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src='../Scripts/roomInfo.js'></script>  
+    <script src='../Highchart/js/highcharts.js'></script>
+      
   </head>
 
   <body>
@@ -58,18 +63,15 @@
           <div class="row">
             <div class="col-6 col-sm-6 col-lg-4">
               <h2>Internal temperature</h2>
-              <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-              <p><a class="btn btn-default" href="#">View details &raquo;</a></p>
+              <p id='temperature'></p>
             </div><!--/span-->
             <div class="col-6 col-sm-6 col-lg-4">
               <h2>Wheather information</h2>
-              <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-              <p><a class="btn btn-default" href="#">View details &raquo;</a></p>
+				<p id='weather'></p>
             </div><!--/span-->
             <div class="col-6 col-sm-6 col-lg-4">
               <h2>Calendar</h2>
-              <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-              <p><a class="btn btn-default" href="#">View details &raquo;</a></p>
+              <p id='calendar'></p>
             </div><!--/span-->
           </div><!--/row-->
         </div><!--/span-->
