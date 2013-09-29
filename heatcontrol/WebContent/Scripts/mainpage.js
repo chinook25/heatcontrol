@@ -2,6 +2,7 @@
 // and display the internal temperature in a graph.
 $(document).ready(function() {
 	// Get info on different rooms from DB
+	var rooms.load()
 	
 	// For each room get the information on the internal temperature,
 	// create a new <div> table with the room name and a graph,
