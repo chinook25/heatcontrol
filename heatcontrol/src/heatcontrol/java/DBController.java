@@ -1,4 +1,4 @@
-package heatcontrol.Java;
+package heatcontrol.java;
 
 import java.net.UnknownHostException;
 import java.util.*;
