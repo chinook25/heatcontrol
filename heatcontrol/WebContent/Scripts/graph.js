@@ -1,5 +1,4 @@
-function graph() {
-	alert("Hello world");
+function graph($b) {
     $(document).ready(function() {
         Highcharts.setOptions({
             global: {
@@ -8,7 +7,7 @@ function graph() {
         });
     
         var chart;
-        $('#container').highcharts({
+        $(document.getElementById($b)).highcharts({
             chart: {
                 type: 'spline',
                 animation: Highcharts.svg, // don't animate in old IE

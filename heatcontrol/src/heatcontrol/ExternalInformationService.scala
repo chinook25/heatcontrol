@@ -16,6 +16,9 @@ object ExternalInformationService {
   def getWeatherInformation() {
 	val weatherString: String = weatherCall(weatherURL)
 	val weatherXML = XML.loadString(weatherString)
+	val temp_c = (weatherXML \\ "current_condition" \ "temp_c") text
+	println(temp_c)
+	
 	
   }
   
