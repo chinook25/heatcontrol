@@ -5,31 +5,34 @@
  */
 package heatcontrol
 
-import org.apache.http._
+/* general imports for scala useages */
 import scala.xml.XML
-import java.io._
+import scala.Console._
+
+/* imports for http rest functions and calls */
+import org.apache.http.client._
+import org.apache.http.impl.client._
+import org.apache.http.client.methods._
 
 object ExternalInformationService {
-  
-  weatherURL: String = "http://api.worldweatheronline.com/free/v1/weather.ashx?q=Groningen&format=XML&num_of_days=1&key="
+
+  val weatherURL: String = "http://api.worldweatheronline.com/free/v1/weather.ashx?q=Groningen&format=XML&num_of_days=1&key=8phfymv55kgpmynugrzaq84v"
   
   def getWeatherInformation() {
 	val weatherString: String = weatherCall(weatherURL)
 	val weatherXML = XML.loadString(weatherString)
-	val temp_c = (weatherXML \\ "current_condition" \ "temp_c") text
-	println(temp_c)
-	
-	
+	val temp_c : Integer = Integer.parseInt((weatherXML \\ "temp_c").text)
+	println("temp: " + temp_c)	
   }
   
   def weatherCall(url:String): String = {
-    val httpClient = new defaultHttpClient()
-    val httpResponds = httpClient.execute(new httpGet(url))
+    val httpClient = new DefaultHttpClient()
+    val httpResponds = httpClient.execute(new HttpGet(url))
     val entity = httpResponds.getEntity()
     val content = ""
     if (entity != null) {
       val stream = entity.getContent()
-      content = io.Source.fromInputStream(stream).getLines.mkString
+      val content = io.Source.fromInputStream(stream).getLines.mkString
       stream.close
     }
     httpClient.getConnectionManager.shutdown()
