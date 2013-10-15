@@ -7,28 +7,47 @@ import com.mongodb.*;
 
 class DBController implements Runnable {
 	DB db;
+	MongoClient mongoClient;
 
 	public void run() {
-		MongoClient mongoClient;
 		try {
 			mongoClient = new MongoClient("localhost", 27017);
 			db = mongoClient.getDB("mydb");
-			test();
-			db.dropDatabase();
-			mongoClient.close();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void insertDocument(String collectionName, BasicDBObject object) {
+	public void dropDB() {
+		db.dropDatabase();
+		mongoClient.close();
+	}
+
+	public void insertWeatherData(WeatherObject w) {
+		BasicDBObject object = new BasicDBObject("Type", w.getType())
+				.append("Minimal Temperature", w.getTempMin())
+				.append("Maximal Temperature", w.getTempMax())
+				.append("Date", w.getDate());
+		insertDocument(w.getType(), object);
+	}
+
+	public void insertExternalSensorData(ExternalSensorObject e) {
+		BasicDBObject object = new BasicDBObject("Type", e.getType())
+				.append("Temperature", e.getTemp()).append("Date", e.getDate())
+				.append("Time", e.getTimestamp());
+		insertDocument(e.getType(), object);
+
+	}
+
+	
+	private void insertDocument(String collectionName, BasicDBObject object) {
 		DBCollection collection = db.getCollection(collectionName);
 		collection.insert(object);
 	}
 
-	public DBObject getDocument(String collectionName, DBObject query) {
+	private DBObject getDocument(String collectionName, DBObject query) {
 		DBCursor cursor = db.getCollection(collectionName).find(query);
-		DBObject doc= null;
+		DBObject doc = null;
 		try {
 			while (cursor.hasNext()) {
 				doc = cursor.next();
