@@ -36,7 +36,14 @@ class DBController implements Runnable {
 				.append("Temperature", e.getTemp()).append("Date", e.getDate())
 				.append("Time", e.getTimestamp());
 		insertDocument(e.getType(), object);
+	}
 
+	public void insertCalendarData(CalendarObject c) {
+		BasicDBObject object = new BasicDBObject("Type", c.getType())
+				.append("Room", c.getRoomID())
+				.append("Start Time", c.getStartTime())
+				.append("End Time", c.getEndTime()).append("Date", c.getDate());
+		insertDocument(c.getType(), object);
 	}
 
 	
