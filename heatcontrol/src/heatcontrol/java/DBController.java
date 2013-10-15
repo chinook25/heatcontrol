@@ -3,6 +3,7 @@ package heatcontrol.java;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.*;
+
 import com.mongodb.*;
 
 class DBController implements Runnable {
@@ -11,13 +12,18 @@ class DBController implements Runnable {
 	private final LinkedBlockingQueue<WeatherObject> weatherQueue;
 	private final LinkedBlockingQueue<ExternalSensorObject> externalSensorQueue;
 	private final LinkedBlockingQueue<CalendarObject> calendarQueue;
+	private final LinkedBlockingQueue<QueryObject> queryQueue;
+	private final LinkedBlockingQueue<DBObject> answerQueue;
 
 	DBController(LinkedBlockingQueue<WeatherObject> wq,
 			LinkedBlockingQueue<ExternalSensorObject> eq,
-			LinkedBlockingQueue<CalendarObject> cq) {
+			LinkedBlockingQueue<CalendarObject> cq,
+			LinkedBlockingQueue<QueryObject> qq, LinkedBlockingQueue<DBObject> aq) {
 		weatherQueue = wq;
 		externalSensorQueue = eq;
 		calendarQueue = cq;
+		queryQueue = qq;
+		answerQueue = aq;
 	}
 
 	public void run() {
@@ -34,12 +40,27 @@ class DBController implements Runnable {
 					insertWeatherData(forecast);
 				}
 				ExternalSensorObject extern = externalSensorQueue.poll();
-				if(extern != null){
+				if (extern != null) {
 					insertExternalSensorData(extern);
 				}
 				CalendarObject cal = calendarQueue.poll();
-				if(cal != null){
+				if (cal != null) {
 					insertCalendarData(cal);
+				}
+				QueryObject query = queryQueue.poll();
+				if (query != null) {
+					DBCollection coll = db.getCollection(query.getType());
+					DBCursor cursor = coll.find(query.getQuery());
+					DBObject result = null;
+					try{
+						while(cursor.hasNext()){
+							result = cursor.next();
+						}
+					} finally {
+						cursor.close();
+					}
+					answerQueue.add(result);
+					
 				}
 			}
 		}
@@ -51,7 +72,7 @@ class DBController implements Runnable {
 		mongoClient.close();
 	}
 
-	public void insertWeatherData(WeatherObject w) {
+	private void insertWeatherData(WeatherObject w) {
 		BasicDBObject object = new BasicDBObject("Type", w.getType())
 				.append("Minimal Temperature", w.getTempMin())
 				.append("Maximal Temperature", w.getTempMax())
@@ -59,14 +80,14 @@ class DBController implements Runnable {
 		insertDocument(w.getType(), object);
 	}
 
-	public void insertExternalSensorData(ExternalSensorObject e) {
+	private void insertExternalSensorData(ExternalSensorObject e) {
 		BasicDBObject object = new BasicDBObject("Type", e.getType())
 				.append("Temperature", e.getTemp()).append("Date", e.getDate())
 				.append("Time", e.getTimestamp());
 		insertDocument(e.getType(), object);
 	}
 
-	public void insertCalendarData(CalendarObject c) {
+	private void insertCalendarData(CalendarObject c) {
 		BasicDBObject object = new BasicDBObject("Type", c.getType())
 				.append("Room", c.getRoomID())
 				.append("Start Time", c.getStartTime())
@@ -98,7 +119,7 @@ class DBController implements Runnable {
 		for (String s : colls) {
 			System.out.println(s);
 		}
-		DBObject myDoc = db.getCollection("testCollection").findOne();
+		DBObject myDoc = db.getCollection("weather").findOne();
 		System.out.println(myDoc);
 
 	}
