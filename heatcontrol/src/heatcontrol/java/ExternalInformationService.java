@@ -12,6 +12,7 @@ import org.xml.sax.SAXException;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,23 +21,25 @@ import javax.xml.parsers.ParserConfigurationException;
 public class ExternalInformationService implements Runnable {
 
 	private String weatherURL = "http://api.worldweatheronline.com/free/v1/weather.ashx?q=Groningen&format=XML&num_of_days=1&key=8phfymv55kgpmynugrzaq84v";
-	private ArrayList<String> calendarIDs = new ArrayList<String>(0); 	
+	private ArrayList<String> calendarIDs = new ArrayList<String>(0);
 	private ExternalSensors sensors = null;
 
 	private int numSensors = 4; // amount of sensors on the building containing
 								// the rooms
 
-	public ExternalInformationService() {
+	private final LinkedBlockingQueue<WeatherObject> weatherQueue;
+	private final LinkedBlockingQueue<ExternalSensorObject> externalSensorQueue;
+	private final LinkedBlockingQueue<CalendarObject> calendarQueue;
+
+	public ExternalInformationService(LinkedBlockingQueue<WeatherObject> wq,
+			LinkedBlockingQueue<ExternalSensorObject> eq,
+			LinkedBlockingQueue<CalendarObject> cq) {
 		calendarIDs.add("34r7otno7m7k4d50cg8j4urqps@group.calendar.google.com");
+		weatherQueue = wq;
+		externalSensorQueue = eq;
+		calendarQueue = cq;
 	}
-	
-	
-	public static void Main(String[] args) {
-		Thread thread = new Thread(new ExternalInformationService(),
-				"ExternalInformationService");
-		thread.start();
-	}
-	
+
 	public void run() {
 		while (true) {
 			if (sensors == null) {
@@ -80,31 +83,33 @@ public class ExternalInformationService implements Runnable {
 		// DBListener.put(externalTemp);
 	}
 
-	/** 
-	 * getCalendarInformation prepares and executes a REST call to the calendar service.
-	 * For each calendar specified the information in the calendars is retrieved through a REST call.
-	 * This information is parsed from the returned XML and stored in the database.
+	/**
+	 * getCalendarInformation prepares and executes a REST call to the calendar
+	 * service. For each calendar specified the information in the calendars is
+	 * retrieved through a REST call. This information is parsed from the
+	 * returned XML and stored in the database.
 	 */
 	private void getCalendarInformation() {
-		Document calendarInformation = null;
-		
-		// get the data of today and add a day to represent tomorrow. 
-		//This is used to limit the amount of calendar events retrieved
-		Calendar tomorrow = Calendar.getInstance(); 
-		tomorrow.add(tomorrow.DAY_OF_YEAR, 1);
-		
-		for (int i = 0; i < calendarIDs.size(); i++) { // for each calendar owned by the rooms
-			// Build URL for current calendar
-			String calendarURL = 
-			// Get the XML containing the list of all events in the calendar
-			try {
-			calendarInformation = restCall(calendarURL);
-		} catch (IOException e) {
-			System.out.println("Calendar call failed");
-			e.printStackTrace();
-		}
-		
-		}
+		// Document calendarInformation = null;
+		//
+		// // get the data of today and add a day to represent tomorrow.
+		// //This is used to limit the amount of calendar events retrieved
+		// Calendar tomorrow = Calendar.getInstance();
+		// tomorrow.add(tomorrow.DAY_OF_YEAR, 1);
+		//
+		// for (int i = 0; i < calendarIDs.size(); i++) { // for each calendar
+		// owned by the rooms
+		// // Build URL for current calendar
+		// String calendarURL =
+		// // Get the XML containing the list of all events in the calendar
+		// try {
+		// calendarInformation = restCall(calendarURL);
+		// } catch (IOException e) {
+		// System.out.println("Calendar call failed");
+		// e.printStackTrace();
+		// }
+		//
+		// }
 
 		// TODO: parse list of calenders and get information from individual
 		// calendars
@@ -134,13 +139,12 @@ public class ExternalInformationService implements Runnable {
 		int temp_min = getIntValue(weather, "tempMinC");
 		String date = getTextValue(weather, "date");
 
-		// TODO: Save information to database
 		WeatherObject forecast = new WeatherObject(date, temp_max, temp_min);
-		System.out.println("Type: " + forecast.getType());
-		System.out.println("Date: " + forecast.getDate());
-		System.out.println("Temp min: " + forecast.getTempMin());
-		System.out.println("Temp max: " + forecast.getTempMax());
-		// DBListener.put(forecast);
+		weatherQueue.add(forecast);
+		// System.out.println("Type: " + forecast.getType());
+		// System.out.println("Date: " + forecast.getDate());
+		// System.out.println("Temp min: " + forecast.getTempMin());
+		// System.out.println("Temp max: " + forecast.getTempMax());
 	}
 
 	/**
@@ -185,11 +189,14 @@ public class ExternalInformationService implements Runnable {
 	/*
 	 * Helper functions for parsing the XML
 	 */
-	
+
 	/**
-	 * XML parsing helper function. Takes an xml element and the tag that is being looked for. Returns string contained in the tag
+	 * XML parsing helper function. Takes an xml element and the tag that is
+	 * being looked for. Returns string contained in the tag
+	 * 
 	 * @param Element
-	 * @param String tagname
+	 * @param String
+	 *            tagname
 	 * @return String textVal
 	 */
 	private String getTextValue(Element ele, String tagName) {
@@ -205,8 +212,10 @@ public class ExternalInformationService implements Runnable {
 
 	/**
 	 * Calls getTextValue and returns a int value of the returned String
+	 * 
 	 * @param Element
-	 * @param String tagname
+	 * @param String
+	 *            tagname
 	 * @return String
 	 */
 	private int getIntValue(Element ele, String tagName) {

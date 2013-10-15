@@ -9,11 +9,17 @@ class DBController implements Runnable {
 	DB db;
 	MongoClient mongoClient;
 	private final LinkedBlockingQueue<WeatherObject> weatherQueue;
-	
-	DBController(LinkedBlockingQueue<WeatherObject> q){
-		weatherQueue = q;
+	private final LinkedBlockingQueue<ExternalSensorObject> externalSensorQueue;
+	private final LinkedBlockingQueue<CalendarObject> calendarQueue;
+
+	DBController(LinkedBlockingQueue<WeatherObject> wq,
+			LinkedBlockingQueue<ExternalSensorObject> eq,
+			LinkedBlockingQueue<CalendarObject> cq) {
+		weatherQueue = wq;
+		externalSensorQueue = eq;
+		calendarQueue = cq;
 	}
-	
+
 	public void run() {
 		synchronized (this) {
 			try {
@@ -22,19 +28,22 @@ class DBController implements Runnable {
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 			}
-			int i=0;
 			while (true) {
-				try {
-					System.out.println(i);
-					this.wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				WeatherObject forecast = weatherQueue.poll();
+				if (forecast != null) {
+					insertWeatherData(forecast);
 				}
-				i++;
+				ExternalSensorObject extern = externalSensorQueue.poll();
+				if(extern != null){
+					insertExternalSensorData(extern);
+				}
+				CalendarObject cal = calendarQueue.poll();
+				if(cal != null){
+					insertCalendarData(cal);
+				}
 			}
 		}
-		// Check queues
+
 	}
 
 	public void dropDB() {
