@@ -2,20 +2,39 @@ package heatcontrol.java;
 
 import java.net.UnknownHostException;
 import java.util.*;
-
+import java.util.concurrent.*;
 import com.mongodb.*;
 
 class DBController implements Runnable {
 	DB db;
 	MongoClient mongoClient;
-
+	private final LinkedBlockingQueue<WeatherObject> weatherQueue;
+	
+	DBController(LinkedBlockingQueue<WeatherObject> q){
+		weatherQueue = q;
+	}
+	
 	public void run() {
-		try {
-			mongoClient = new MongoClient("localhost", 27017);
-			db = mongoClient.getDB("mydb");
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
+		synchronized (this) {
+			try {
+				mongoClient = new MongoClient("localhost", 27017);
+				db = mongoClient.getDB("mydb");
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+			int i=0;
+			while (true) {
+				try {
+					System.out.println(i);
+					this.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				i++;
+			}
 		}
+		// Check queues
 	}
 
 	public void dropDB() {
@@ -46,7 +65,6 @@ class DBController implements Runnable {
 		insertDocument(c.getType(), object);
 	}
 
-	
 	private void insertDocument(String collectionName, BasicDBObject object) {
 		DBCollection collection = db.getCollection(collectionName);
 		collection.insert(object);
@@ -66,10 +84,6 @@ class DBController implements Runnable {
 	}
 
 	public void test() {
-		BasicDBObject doc = new BasicDBObject("name", "MongoDB")
-				.append("type", "database").append("count", 1)
-				.append("info", new BasicDBObject("x", 203).append("y", 102));
-		insertDocument("testCollection", doc);
 		Set<String> colls = db.getCollectionNames();
 
 		for (String s : colls) {
@@ -80,8 +94,4 @@ class DBController implements Runnable {
 
 	}
 
-	public static void main(String[] args) throws UnknownHostException {
-		Thread t = new Thread(new DBController(), "My Thread");
-		t.start();
-	}
 }
