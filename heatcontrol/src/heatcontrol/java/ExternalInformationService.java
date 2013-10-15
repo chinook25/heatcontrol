@@ -213,5 +213,4 @@ public class ExternalInformationService implements Runnable {
 		// in production application you would catch the exception
 		return Integer.parseInt(getTextValue(ele, tagName));
 	}
-
 }
