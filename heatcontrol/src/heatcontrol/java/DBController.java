@@ -12,13 +12,13 @@ class DBController implements Runnable {
 	private final LinkedBlockingQueue<WeatherObject> weatherQueue;
 	private final LinkedBlockingQueue<ExternalSensorObject> externalSensorQueue;
 	private final LinkedBlockingQueue<CalendarObject> calendarQueue;
-	private final LinkedBlockingQueue<QueryObject> queryQueue;
+	private final LinkedBlockingQueue<tmpQueryObject> queryQueue;
 	private final LinkedBlockingQueue<DBObject> answerQueue;
 
 	DBController(LinkedBlockingQueue<WeatherObject> wq,
 			LinkedBlockingQueue<ExternalSensorObject> eq,
 			LinkedBlockingQueue<CalendarObject> cq,
-			LinkedBlockingQueue<QueryObject> qq, LinkedBlockingQueue<DBObject> aq) {
+			LinkedBlockingQueue<tmpQueryObject> qq, LinkedBlockingQueue<DBObject> aq) {
 		weatherQueue = wq;
 		externalSensorQueue = eq;
 		calendarQueue = cq;
@@ -47,7 +47,7 @@ class DBController implements Runnable {
 				if (cal != null) {
 					insertCalendarData(cal);
 				}
-				QueryObject query = queryQueue.poll();
+				tmpQueryObject query = queryQueue.poll();
 				if (query != null) {
 					DBCollection coll = db.getCollection(query.getType());
 					DBCursor cursor = coll.find(query.getQuery());
