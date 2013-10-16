@@ -11,6 +11,7 @@ class DBController implements Runnable {
 	MongoClient mongoClient;
 	private final LinkedBlockingQueue<WeatherObject> weatherQueue;
 	private final LinkedBlockingQueue<ExternalSensorObject> externalSensorQueue;
+//	private final LinkedBlockingQueue<InternalSensorObject> internalSensorQueue;
 	private final LinkedBlockingQueue<CalendarObject> calendarQueue;
 	private final LinkedBlockingQueue<tmpQueryObject> queryQueue;
 	private final LinkedBlockingQueue<DBObject> answerQueue;
@@ -18,9 +19,11 @@ class DBController implements Runnable {
 	DBController(LinkedBlockingQueue<WeatherObject> wq,
 			LinkedBlockingQueue<ExternalSensorObject> eq,
 			LinkedBlockingQueue<CalendarObject> cq,
-			LinkedBlockingQueue<tmpQueryObject> qq, LinkedBlockingQueue<DBObject> aq) {
+			LinkedBlockingQueue<tmpQueryObject> qq,
+			LinkedBlockingQueue<DBObject> aq) {
 		weatherQueue = wq;
 		externalSensorQueue = eq;
+		//internalSensorQueue = iq;
 		calendarQueue = cq;
 		queryQueue = qq;
 		answerQueue = aq;
@@ -52,15 +55,14 @@ class DBController implements Runnable {
 					DBCollection coll = db.getCollection(query.getType());
 					DBCursor cursor = coll.find(query.getQuery());
 					DBObject result = null;
-					try{
-						while(cursor.hasNext()){
+					try {
+						while (cursor.hasNext()) {
 							result = cursor.next();
 						}
 					} finally {
 						cursor.close();
 					}
 					answerQueue.add(result);
-					
 				}
 			}
 		}
@@ -86,6 +88,14 @@ class DBController implements Runnable {
 				.append("Time", e.getTimestamp());
 		insertDocument(e.getType(), object);
 	}
+
+//	private void insertInternalSensorData(InternalSensorObject i) {
+//		BasicDBObject object = new BasicDBObject("Type", i.getType())
+//				.append("RoomID",i.getRoomID())
+//				.append("Temperature", i.getTemp()).append("Date", i.getDate())
+//				.append("Time", i.getTimestamp());
+//		insertDocument(e.getType(), object);
+//	}
 
 	private void insertCalendarData(CalendarObject c) {
 		BasicDBObject object = new BasicDBObject("Type", c.getType())
