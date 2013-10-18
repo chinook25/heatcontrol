@@ -1,6 +1,6 @@
 package heatcontrol.java;
 import com.mongodb.*;
-public class tmpQueryObject {
+public class QueryObject {
 	private String type;
 	private DBObject query;
 	

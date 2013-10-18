@@ -15,7 +15,7 @@ public class Main {
 		LinkedBlockingQueue<ExternalSensorObject> externalSensorQueue = new LinkedBlockingQueue<ExternalSensorObject>();
 //		LinkedBlockingQueue<InternalSensorObject> internalSensorQueue = new LinkedBlockingQueue<InternalSensorObject>();
 		LinkedBlockingQueue<WeatherObject> weatherQueue = new LinkedBlockingQueue<WeatherObject>();
-		LinkedBlockingQueue<tmpQueryObject> queryQueue = new LinkedBlockingQueue<tmpQueryObject>();
+		LinkedBlockingQueue<QueryObject> queryQueue = new LinkedBlockingQueue<QueryObject>();
 		LinkedBlockingQueue<DBObject> answerQueue = new LinkedBlockingQueue<DBObject>();
 		
 		Thread dbc = new Thread(new DBController(weatherQueue,externalSensorQueue, calendarQueue, queryQueue, answerQueue),"Database Controller");
