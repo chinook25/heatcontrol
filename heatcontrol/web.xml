@@ -1,0 +1,12 @@
+    <servlet>
+        <servlet-name>Web Servlet</servlet-name>
+        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>com.sun.jersey.config.property.packages</param-name>
+            <param-value>heatcontrol.web</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Web Servlet</servlet-name>
+        <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
