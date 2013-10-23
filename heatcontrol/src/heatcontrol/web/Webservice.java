@@ -20,7 +20,6 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 
 @Controller
-@Service 
 public class Webservice {
  
     DB database;
@@ -34,14 +33,15 @@ public class Webservice {
 		}
     }
 
-    @RequestMapping("/gettemperature")
-    public @ResponseBody TemperatureResponse temp(
+    @Async
+    @RequestMapping("/getinternaltemperature")
+    public @ResponseBody Future<TemperatureResponse> temp(
             @RequestParam(value="id", required=true) String roomID) {
     		DBCollection col = database.getCollection("Internal temperature");
     		DBCursor tempEntry = col.find();
     		try {
     			if (tempEntry.hasNext())
-    				return new TemperatureResponse(tempEntry.next());
+    				return new AsyncResult<TemperatureResponse>(new TemperatureResponse(tempEntry.next()));
     		} finally {
     			tempEntry.close();
     		}
