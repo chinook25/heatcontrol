@@ -59,16 +59,19 @@ public class Webservice {
 
 	@Async
 	@RequestMapping(value = "/Internaltemperature", method = RequestMethod.GET)
-	public @ResponseBody Future<TemperatureResponse> getInternalTemperature(@RequestParam(value="id", required=true) String roomID) {
+	public @ResponseBody AsyncResult<TemperatureResponse[]> getInternalTemperature(@RequestParam(value="id", required=true) String roomID) {
 		DBCollection col = database.getCollection("Internal temperature");
 		DBCursor tempEntry = col.find();
+		ArrayList<TemperatureResponse> temps = new ArrayList<TemperatureResponse>();
+		DBObject intTempObj = null;
 		try {
 			if (tempEntry.hasNext())
-				return new AsyncResult<TemperatureResponse>(new TemperatureResponse(tempEntry.next()));
+				intTempObj = tempEntry.next();
+				temps.add(new TemperatureResponse(intTempObj));
 		} finally {
 			tempEntry.close();
 		}
-		return null;
+		return new AsyncResult<TemperatureResponse[]>(temps.toArray(new TemperatureResponse[temps.size()]));
 	}
 
 	@Async
@@ -76,14 +79,29 @@ public class Webservice {
 	public @ResponseBody Future<WeatherObject> getWeather()
 	{
 		DBCollection col = database.getCollection("weather");
-		DBCursor cursor = col.find( { date: 'YYYY_MM_DD' } );
+		BasicDBObject query = new BasicDBObject("date", today());
+		DBCursor cursor = col.find(query);
+		DBObject weatherObj = null;
+		try {
+			if (cursor.hasNext()) {
+				weatherObj = cursor.next();
+			}
+		} finally {
+			cursor.close();
+		}
+		if (weatherObj != null)
+			return new AsyncResult<WeatherObject>(new WeatherObject(weatherObj.get("date").toString(),Integer.parseInt(weatherObj.get("temp_min").toString()),Integer.parseInt(weatherObj.get("temp_max").toString())));
+		else
+			return null;
 	}
-	
+
 	@Async
 	@RequestMapping(value = "/Calendar", method = RequestMethod.GET)
 	public @ResponseBody Future<CalendarObject[]> getCalendar() {
 		DBCollection col = database.getCollection("calendar");
-		DBCursor cursor = col.find( {date: today(), time_start: "", time_end: "" });
+		BasicDBObject query = new BasicDBObject("date", today());
+		DBCursor cursor = col.find(query);
+		//DBCursor cursor = col.find( {date: today(), time_start: "", time_end: "" });
 		ArrayList<CalendarObject> cal = new ArrayList<CalendarObject>();
 		try {
 			while (cursor.hasNext()) {
@@ -94,11 +112,9 @@ public class Webservice {
 		} finally {
 			cursor.close();
 		}
-			
+
 		return new AsyncResult<CalendarObject[]>(cal.toArray(new CalendarObject[cal.size()]));
 	}
-	
-	
 
 
 	@Async
@@ -119,7 +135,7 @@ public class Webservice {
 	public void startController(@RequestParam(value="roomID", required=true) String roomID) {
 
 	}
-	
+
 	@Async
 	@RequestMapping(value = "/RemoveRoom", method=RequestMethod.DELETE)
 	public void removeRoom(@RequestParam(value="roomID", required=true) String roomID) {
