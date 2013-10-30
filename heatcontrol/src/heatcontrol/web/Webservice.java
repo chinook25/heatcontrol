@@ -6,12 +6,10 @@ import heatcontrol.java.WeatherObject;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.Future;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.stereotype.Service;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,7 +23,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
-import com.mongodb.MongoClient;
 
 @Controller
 public class Webservice {
@@ -36,14 +33,16 @@ public class Webservice {
 	public Webservice() {
 		try {
 			database = Mongo.connect(new DBAddress("localhost",27017,"mydb"));
+			System.out.println("Webservice connected to database");
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Async
-	@RequestMapping(value = "/Rooms", method=RequestMethod.GET)
-	public @ResponseBody Future<String[]> getRooms() {
+	@RequestMapping(value = "rooms", method=RequestMethod.GET)
+	@ResponseBody
+	public Future<String[]> getRooms() {
 		ArrayList<String> rooms = new ArrayList<String>();
 		DBCollection temperatures = database.getCollection("Internal temperature");
 		DBCursor roomCursor = temperatures.find();
@@ -58,8 +57,9 @@ public class Webservice {
 	}
 
 	@Async
-	@RequestMapping(value = "/Internaltemperature", method = RequestMethod.GET)
-	public @ResponseBody AsyncResult<TemperatureResponse[]> getInternalTemperature(@RequestParam(value="id", required=true) String roomID) {
+	@RequestMapping(value = "internaltemperature", method = RequestMethod.GET)
+	@ResponseBody
+	public AsyncResult<TemperatureResponse[]> getInternalTemperature(@RequestParam(value="id", required=true) String roomID) {
 		DBCollection col = database.getCollection("Internal temperature");
 		DBCursor tempEntry = col.find();
 		ArrayList<TemperatureResponse> temps = new ArrayList<TemperatureResponse>();
@@ -75,8 +75,9 @@ public class Webservice {
 	}
 
 	@Async
-	@RequestMapping(value = "/Weather", method = RequestMethod.GET)
-	public @ResponseBody Future<WeatherObject> getWeather()
+	@RequestMapping(value = "weather", method = RequestMethod.GET)
+	@ResponseBody
+	public Future<WeatherObject> getWeather()
 	{
 		DBCollection col = database.getCollection("weather");
 		BasicDBObject query = new BasicDBObject("date", today());
@@ -92,16 +93,17 @@ public class Webservice {
 		if (weatherObj != null)
 			return new AsyncResult<WeatherObject>(new WeatherObject(weatherObj.get("date").toString(),Integer.parseInt(weatherObj.get("temp_min").toString()),Integer.parseInt(weatherObj.get("temp_max").toString())));
 		else
+			System.out.println("Error: Weather asked but not available");
 			return null;
 	}
 
 	@Async
-	@RequestMapping(value = "/Calendar", method = RequestMethod.GET)
-	public @ResponseBody Future<CalendarObject[]> getCalendar() {
+	@RequestMapping(value = "calendar", method = RequestMethod.GET)
+	@ResponseBody
+	public Future<CalendarObject[]> getCalendar() {
 		DBCollection col = database.getCollection("calendar");
 		BasicDBObject query = new BasicDBObject("date", today());
 		DBCursor cursor = col.find(query);
-		//DBCursor cursor = col.find( {date: today(), time_start: "", time_end: "" });
 		ArrayList<CalendarObject> cal = new ArrayList<CalendarObject>();
 		try {
 			while (cursor.hasNext()) {
@@ -118,9 +120,10 @@ public class Webservice {
 
 
 	@Async
-	@RequestMapping(value = "/StoreTemperature", method= RequestMethod.POST)
+	@RequestMapping(value = "storetemperature", method= RequestMethod.POST)
 	public void storeTemperature(@RequestParam(value="roomID", required=true) String roomID, @RequestParam(value="temp", required=true) int temp) {
 		Calendar now = Calendar.getInstance();
+		@SuppressWarnings("static-access")
 		BasicDBObject object = new BasicDBObject("type", "Internal temperature")
 		.append("roomID", roomID)
 		.append("Temperature", temp)
@@ -131,13 +134,13 @@ public class Webservice {
 
 
 	@Async
-	@RequestMapping(value = "/NewRoom", method=RequestMethod.POST)
+	@RequestMapping(value = "newroom", method=RequestMethod.POST)
 	public void startController(@RequestParam(value="roomID", required=true) String roomID) {
 
 	}
 
 	@Async
-	@RequestMapping(value = "/RemoveRoom", method=RequestMethod.DELETE)
+	@RequestMapping(value = "removeroom", method=RequestMethod.DELETE)
 	public void removeRoom(@RequestParam(value="roomID", required=true) String roomID) {
 		// Stop room controller
 		DBCollection roomCollection = database.getCollection(roomID);
@@ -147,6 +150,7 @@ public class Webservice {
 	/*#*****************
 	 *# Helper functions
 	 *#*****************/
+	@SuppressWarnings("static-access")
 	private String today() {
 		return Integer.toString(Calendar.getInstance().DAY_OF_YEAR);		
 	}

@@ -53,13 +53,14 @@ public class ExternalInformationService implements Runnable {
 			// sources
 			// if (Calendar.getInstance().HOUR == 12) {
 			getWeatherInformation();
+			System.out.println("getting weather information");
 			getCalendarInformation();
 			// }
 			// sleep for the rest of the hour
 			try {
 				// Thread.sleep(3600000 - (System.currentTimeMillis() -
 				// startTime));
-				Thread.sleep(6000); // for testing sleep 6 seconds
+				Thread.sleep(600000); // for testing sleep 6 seconds
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
