@@ -91,7 +91,7 @@ class DBController implements Runnable {
 
 //	private void insertInternalSensorData(InternalSensorObject i) {
 //		BasicDBObject object = new BasicDBObject("Type", i.getType())
-//				.append("RoomID",i.getRoomID())
+//				.append("Rooms",i.getRoomID())
 //				.append("Temperature", i.getTemp()).append("Date", i.getDate())
 //				.append("Time", i.getTimestamp());
 //		insertDocument(e.getType(), object);
@@ -110,7 +110,7 @@ class DBController implements Runnable {
 		collection.insert(object);
 	}
 
-	private DBObject getDocument(String collectionName, DBObject query) {
+	public DBObject getDocument(String collectionName, DBObject query) {
 		DBCursor cursor = db.getCollection(collectionName).find(query);
 		DBObject doc = null;
 		try {

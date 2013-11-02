@@ -10,7 +10,7 @@ public class ExternalSensorObject {
 	private String type = "External Sensors";
 	private String date;
 	private String timestamp;
-	private int temp;
+	private double temp;
 	
 	public ExternalSensorObject(int t) {
 		this.date = Calendar.YEAR + "-" + Calendar.MONTH + "-" + Calendar.DATE;
@@ -30,7 +30,7 @@ public class ExternalSensorObject {
 		return timestamp;
 	}
 	
-	public int getTemp() {
+	public double getTemp() {
 		return temp;
 	}
 }

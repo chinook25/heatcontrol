@@ -6,7 +6,7 @@ public class InternalTempObject {
 	private String type = "Internal temperature";
 	private String date;
 	private String timestamp;
-	private int temp;
+	private double temp;
 	private String roomID;
 	
 	public InternalTempObject(int t, String id) {
@@ -28,7 +28,7 @@ public class InternalTempObject {
 		return timestamp;
 	}
 	
-	public int getTemp() {
+	public double getTemp() {
 		return temp;
 	}
 	

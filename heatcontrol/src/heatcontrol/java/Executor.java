@@ -7,6 +7,16 @@ package heatcontrol.java;
  * znode in the filesystem. It also starts the specified program
  * with the specified arguments when the znode exists and kills
  * the program if the znode goes away.
+ * 
+ * 
+ * Arguments:
+ * the address of the ZooKeeper service
+ * the name of a znode - the one to be watched
+ * the name of a file to write the output to
+ * an executable with arguments.
+ * 
+ * https://zookeeper.apache.org/doc/trunk/javaExample.html
+ * 
  */
 import java.io.FileOutputStream;
 import java.io.IOException;
