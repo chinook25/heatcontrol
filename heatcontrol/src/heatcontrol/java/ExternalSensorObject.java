@@ -12,12 +12,21 @@ public class ExternalSensorObject {
 	private String timestamp;
 	private double temp;
 	
+	/* constructor used when first creating the entry for the DB */
 	public ExternalSensorObject(int t) {
 		this.date = Calendar.YEAR + "-" + Calendar.MONTH + "-" + Calendar.DATE;
 		this.timestamp = Calendar.HOUR + ":" + Calendar.MINUTE;
 		this.temp = t;
 	}
 	
+	/* constructor used when using this object to pass information over the web */
+	public ExternalSensorObject(String date, String timestamp,
+			double temp) {
+		this.date = date;
+		this.timestamp = timestamp;
+		this.temp = temp;
+	}
+
 	public String getType() {
 		return type;
 	}

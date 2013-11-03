@@ -1,6 +1,7 @@
 package heatcontrol.web;
 
 import heatcontrol.java.CalendarObject;
+import heatcontrol.java.ExternalSensorObject;
 import heatcontrol.java.WeatherObject;
 
 import java.net.UnknownHostException;
@@ -23,6 +24,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
 
 @Controller
 public class Webservice {
@@ -32,7 +34,8 @@ public class Webservice {
 
 	public Webservice() {
 		try {
-			database = Mongo.connect(new DBAddress("localhost",27017,"mydb"));
+			MongoClient mongoClient = new MongoClient("localhost", 27017);
+			database = mongoClient.getDB("mydb");
 			System.out.println("Webservice connected to database");
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -72,6 +75,24 @@ public class Webservice {
 			tempEntry.close();
 		}
 		return new AsyncResult<TemperatureResponse[]>(temps.toArray(new TemperatureResponse[temps.size()]));
+	}
+	
+	@Async
+	@RequestMapping(value = "externaltemperature", method = RequestMethod.GET)
+	@ResponseBody
+	public AsyncResult<ExternalSensorObject> getExternalTemperature() {
+		DBCollection col = database.getCollection("External Sensors");
+		DBCursor tempEntry = col.find(new BasicDBObject("date", today()));
+		DBObject tempObj = null;
+		ExternalSensorObject response = null;
+		try {
+			if (tempEntry.hasNext())
+				tempObj = tempEntry.next();
+				 response = new ExternalSensorObject(tempObj.get("date").toString(), tempObj.get("timestamp").toString(),Double.parseDouble(tempObj.get("temp").toString()));
+		} finally {
+			tempEntry.close();
+		}
+		return new AsyncResult<ExternalSensorObject>(response);
 	}
 
 	@Async
