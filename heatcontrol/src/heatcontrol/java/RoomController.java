@@ -1,6 +1,11 @@
 package heatcontrol.java;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.concurrent.*;
+
+import org.apache.zookeeper.*;
+import org.springframework.web.client.RestTemplate;
 
 import com.mongodb.*;
 
@@ -13,17 +18,21 @@ public class RoomController implements Runnable {
 	boolean isVentingOn;
 	boolean isHeatingOn;
 	boolean killed;
+	RestTemplate rest = new RestTemplate();
+    String url;
 
-	public RoomController(String id) {
+	public RoomController(String id, String url) {
 		isHeatingOn = false;
 		isVentingOn = false;
 		killed = false;
 		internalTemperature = (int) Math.random() * 11 + 15;
 		getExternalTemperature();
 		roomID = id;
+		this.url = url;
 	}
 
 	public void run() {
+		System.out.println("hallo");
 		try {
 			mongoClient = new MongoClient("localhost", 27017);
 			db = mongoClient.getDB("mydb");
@@ -52,6 +61,21 @@ public class RoomController implements Runnable {
 		}
 	}
 
+//	public ZooKeeper connect(String hosts, int sessionTimeout)
+//	        throws IOException, InterruptedException {
+//	  final CountDownLatch connectedSignal = new CountDownLatch(1);
+//	  ZooKeeper zk = new ZooKeeper(hosts, sessionTimeout, new Watcher() {
+//	    @Override
+//	    public void process(WatchedEvent event) {
+//	      if (event.getState() == Watcher.Event.KeeperState.SyncConnected) {
+//	        connectedSignal.countDown();
+//	      }
+//	    }
+//	  });
+//	  connectedSignal.await();
+//	  return zk;
+//	}	
+//	
 	double calculateTemperatureDelta() {
 		// update the outside temperature
 		getExternalTemperature();
@@ -77,13 +101,18 @@ public class RoomController implements Runnable {
 	}
 
 	void getExternalTemperature() {
-		// TODO
+		ExternalSensorObject externalTemp = rest.getForObject(url+"/externaltemperature", ExternalSensorObject.class);
+        externalTemperature = (int)Math.round(externalTemp.getTemp());
 	}
 
 	void getCalendarInformation() {
 		// TODO
 	}
-
+	void storeInternalTemperature(){
+		 InternalTempObject internalTemp = new InternalTempObject((int)internalTemperature, roomID);
+	     rest.postForLocation(url+"/storeinternal?roomID={ID}&temp={temp}", internalTemp,roomID,internalTemperature);    
+	}
+	
 	void turnOnHeating() {
 		isVentingOn = false;
 		isHeatingOn = true;
@@ -105,7 +134,8 @@ public class RoomController implements Runnable {
 
 	public static void main(String[] args) {
 		String id = args[0];
-		Thread t = new Thread(new RoomController(id));
+		String webserviceUrl = args[1];
+		Thread t = new Thread(new RoomController(id, webserviceUrl));
 		t.start();
 	}
 
