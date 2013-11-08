@@ -60,7 +60,7 @@ public class ExternalInformationService implements Runnable {
 			try {
 				// Thread.sleep(3600000 - (System.currentTimeMillis() -
 				// startTime));
-				Thread.sleep(600000); // for testing sleep 6 seconds
+				Thread.sleep(60000); // for testing sleep 6 seconds
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -79,9 +79,8 @@ public class ExternalInformationService implements Runnable {
 		for (int i = 0; i < temperatures.length; i++) {
 			sum += temperatures[i];
 		}
-		ExternalSensorObject externalTemp = new ExternalSensorObject(sum
-				/ temperatures.length);
-		// DBListener.put(externalTemp);
+		ExternalSensorObject externalTemp = new ExternalSensorObject(sum/ temperatures.length);
+		externalSensorQueue.add(externalTemp);
 	}
 
 	/**
